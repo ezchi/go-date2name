@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-var (
-	inFileName string
-)
-
 func main() {
+	var inFileName string
+
 	flag.StringVar(&inFileName, "f", "", "file name")
 
 	flag.Parse()
+
+	inFileName, _ = removeSpaces(inFileName)
 
 	_, err := getTimeFromName(inFileName)
 
@@ -32,18 +32,34 @@ func main() {
 
 	outFileName := fmt.Sprintf("%s_%s", s, inFileName)
 
-	_, err = os.Stat(outFileName)
+	err = rename(inFileName, outFileName)
 
-	if !os.IsNotExist(err) {
-		log.Fatalf("File %s is already exist", outFileName)
-	}
-
-	err = os.Rename(inFileName, outFileName)
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Fatal(err)
 	}
 }
 
+func isExist(path string) bool {
+	_, err := os.Stat(path)
+
+	return !os.IsNotExist(err)
+}
+
+func rename(oldName, newName string) error {
+	if isExist(newName) {
+		return fmt.Errorf("file %s already exist", newName)
+	}
+
+	return os.Rename(oldName, newName)
+}
+
+func removeSpaces(path string) (string, error) {
+	s := strings.Split(path, " ")
+
+	f := strings.Join(s, "_")
+
+	return f, rename(path, f)
+}
 func getTimeFromName(path string) (string, error) {
 	s := strings.SplitN(path, "_", 2)
 
