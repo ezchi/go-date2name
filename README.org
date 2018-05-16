@@ -1,0 +1,2 @@
+* Overview
+  This is just try to reimplement [[https://github.com/novoid/date2name][date2name]] from [[https://github.com/novoid][Karl Voit]] in Go as my learning journey.
