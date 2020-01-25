@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -15,6 +16,10 @@ func main() {
 	flag.StringVar(&inFileName, "f", "", "file name")
 
 	flag.Parse()
+
+	if inFileName == "" {
+		log.Fatal("File name is missing")
+	}
 
 	inFileName, _ = removeSpaces(inFileName)
 
@@ -30,7 +35,10 @@ func main() {
 		log.Fatalf("can not get modified name of %s: %v", inFileName, err)
 	}
 
-	outFileName := fmt.Sprintf("%s_%s", s, inFileName)
+	b := filepath.Base(inFileName)
+	d := filepath.Dir(inFileName)
+
+	outFileName := filepath.Join(d, fmt.Sprintf("%s-%s", s, b))
 
 	err = rename(inFileName, outFileName)
 
