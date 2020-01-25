@@ -23,22 +23,22 @@ func main() {
 
 	inFileName, _ = removeSpaces(inFileName)
 
-	_, err := getTimeFromName(inFileName)
+	b := filepath.Base(inFileName)
 
-	if err == nil {
+	_, ok := getTimeFromName(b)
+
+	if ok {
 		os.Exit(0)
 	}
 
-	s, err := getModifiedTime(inFileName)
+	ts, err := getModifiedTime(inFileName)
 
 	if err != nil {
 		log.Fatalf("can not get modified name of %s: %v", inFileName, err)
 	}
 
-	b := filepath.Base(inFileName)
 	d := filepath.Dir(inFileName)
-
-	outFileName := filepath.Join(d, fmt.Sprintf("%s-%s", s, b))
+	outFileName := filepath.Join(d, fmt.Sprintf("%s-%s", ts, b))
 
 	err = rename(inFileName, outFileName)
 
@@ -68,16 +68,21 @@ func removeSpaces(path string) (string, error) {
 
 	return f, rename(path, f)
 }
-func getTimeFromName(path string) (string, error) {
-	s := strings.SplitN(path, "_", 2)
 
-	_, err := time.Parse(time.RFC3339, s[0])
-
-	if err != nil {
-		return "", err
+func getTimeFromName(path string) (string, bool) {
+	if len(path) < 25 {
+		return "", false
 	}
 
-	return s[0], nil
+	ts := path[:25]
+
+	_, err := time.Parse(time.RFC3339, ts)
+
+	if err != nil {
+		return "", false
+	}
+
+	return ts, true
 }
 
 func getModifiedTime(path string) (string, error) {
